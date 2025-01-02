@@ -22,7 +22,6 @@ const expenseSchema = new Schema<Expense>({
   unitPrice: { type: Number, required:true },
   taxRate: {
     type: Number,
-    required: true,
   },
 });
 

@@ -12,4 +12,6 @@ router
         .get("/:id",roleAuth("USER") , expenseController.getExpenseById)
         .get("/",roleAuth("USER") , expenseController.getAllExpenses)
         .post("/" , roleAuth("USER") , expenseValidator.createExpense , catchError  , expenseController.createExpense)
+        .post("/pay" , roleAuth("USER") , expenseController.payExpense)
+
 export default router;

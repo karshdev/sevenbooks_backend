@@ -69,12 +69,6 @@ export const createExpense = [
     .isFloat({ min: 0.01 })
     .withMessage('Unit price must be greater than 0'),
 
-  body('expenses.*.taxRate')
-    .notEmpty()
-    .withMessage('Tax rate is required')
-    .isFloat({ min: 0 })
-    .withMessage('Tax rate must be a positive number'),
-
   body('expenses.*.status')
     .optional()
     .isIn(['pending', 'paid', 'overdue'])

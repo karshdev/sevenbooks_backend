@@ -20,5 +20,4 @@ router.use("/expense", expenseRoutes);
 router.use("/customer", customerRoutes);
 router.use("/vendor", vendorRoutes);
 
-
 export default router;

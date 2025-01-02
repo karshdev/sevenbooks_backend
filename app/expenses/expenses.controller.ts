@@ -5,7 +5,6 @@ import asyncHandler from "express-async-handler";
 import { type Request, type Response } from 'express'
 
 export const createExpense = asyncHandler(async (req: Request, res: Response) => {  
-    console.log("req.user!._id" , req.user!._id);
     const result = await expenseService.createExpense(req.body);
     res.send(createResponse(result, "Expense created successfully"))
 });
@@ -17,6 +16,10 @@ export const getExpenseById = asyncHandler(async (req: Request, res: Response) =
 
 export const  getAllExpenses = asyncHandler(async (req: Request, res: Response) => {
     const result = await expenseService.getExpenses(req.user!._id);
+    res.send(createResponse(result, "Expense updated successfully"))
+});
+export const  payExpense = asyncHandler(async (req: Request, res: Response) => {
+    const result = await expenseService.payExpenses(req.body ,req.user!._id);
     res.send(createResponse(result, "Expense updated successfully"))
 });
 

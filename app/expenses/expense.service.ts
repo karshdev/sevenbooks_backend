@@ -1,6 +1,13 @@
+import { AccountModel } from "../banking/banking.schema";
 import { CreateExpensePayload } from "./expenses.dto";
 import {VendorModel, ExpenseModel } from "./expenses.schema";
-
+interface PayExpenseRequest {
+  expenses: Array<{
+    expenseId: string;
+    amountToPay: number;
+  }>;
+  accountId: string;
+}
 export const createExpense = async (data: CreateExpensePayload) => { 
   try {    
   
@@ -50,8 +57,6 @@ export const calculateExpensesTotal = (expenses: Array<{
   }, 0);
 };
 
-
-
 export const getExpenseById = async (vendorId: string, userId: string) => {
   try {
     const vendor = await VendorModel.findOne({ _id: vendorId, user: userId });
@@ -97,5 +102,68 @@ export const getExpenses = async (userId: string) => {
     }
     throw new Error('Error fetching expenses');
   }
+};
+
+export const payExpenses = async (data:PayExpenseRequest,userId: string) => {
+
+
+  try {
+    const { expenses, accountId } = data;
+
+    // Get account and verify sufficient balance
+    const account = await AccountModel.findOne({ accountNumber: accountId });
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    const totalPayment = expenses.reduce((sum, exp) => sum + exp.amountToPay, 0);
+    if (account.currentBalance < totalPayment) {
+      throw new Error('Insufficient balance');
+    }
+
+    // Update account balance
+    const updatedAccount = await AccountModel.findOneAndUpdate(
+      { accountNumber: accountId },
+      { $inc: { currentBalance: -totalPayment } },
+      { new: true }
+    );
+
+    // Process each expense
+    const expenseUpdates = await Promise.all(
+      expenses.map(async ({ expenseId, amountToPay }) => {
+        const expense = await ExpenseModel.findById(expenseId);
+        if (!expense) {
+          throw new Error(`Expense ${expenseId} not found`);
+        }
+
+        // If full amount paid, mark as paid
+        const status = amountToPay >= expense.amount ? 'paid' : 'pending';
+        
+        return ExpenseModel.findByIdAndUpdate(
+          expenseId,
+          {
+            $set: { status },
+            // Reduce the amount by what was paid
+            $inc: { amount: -amountToPay }
+          },
+          { new: true }
+        );
+      })
+    );
+
+   
+    return {
+      expenses,
+      account: updatedAccount,
+      updatedExpenses: expenseUpdates
+    }
+
+  } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Error fetching expenses');
+    }
+  
 };
 
