@@ -164,6 +164,6 @@ export const payExpenses = async (data:PayExpenseRequest,userId: string) => {
       }
       throw new Error('Error fetching expenses');
     }
-  
-};
+  }
+
 
