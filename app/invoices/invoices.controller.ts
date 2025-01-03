@@ -1,37 +1,21 @@
 
-import * as userService from "./invoices.service";
+import * as invoiceService from "./invoices.service";
 import { createResponse } from "../common/helper/response.hepler";
 import asyncHandler from "express-async-handler";
 import { type Request, type Response } from 'express'
+import { InvoiceQueryParams, InvoiceStatus } from "./invoices.dto";
 
-export const createUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.createUser(req.body);
-    res.send(createResponse(result, "User created sucssefully"))
-});
 
-export const updateUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.updateUser(req.params.id, req.body);
-    res.send(createResponse(result, "User updated sucssefully"))
-});
 
-export const editUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.editUser(req.params.id, req.body);
-    res.send(createResponse(result, "User updated sucssefully"))
-});
-
-export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.deleteUser(req.params.id);
-    res.send(createResponse(result, "User deleted sucssefully"))
+export const createInvoice = asyncHandler(async (req: Request, res: Response) => {
+    const result = await invoiceService.createInvoice(req.body,req?.user!._id);
+    res.send(createResponse(result, "Invoice created sucssefully"))
 });
 
 
-export const getUserById = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.getUserById(req.params.id);
-    res.send(createResponse(result))
-});
 
-
-export const getAllUser = asyncHandler(async (req: Request, res: Response) => {
-    const result = await userService.getAllUser();
-    res.send(createResponse(result))
+export const getAllInvoices = asyncHandler(async (req: Request, res: Response) => {
+    const queryParams = req.query as InvoiceQueryParams;
+    const result = await invoiceService.getAllInvoices(queryParams, req.user!._id);
+    res.send(createResponse(result,"Invoices fetched sucssefully"));
 });

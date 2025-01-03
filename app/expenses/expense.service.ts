@@ -9,35 +9,35 @@ interface PayExpenseRequest {
   accountId: string;
 }
 export const createExpense = async (data: CreateExpensePayload) => { 
-  try {    
-  
-    const expenses = await Promise.all(
-      data.expenses.map(async (expenseItem) => {
-        let totalAmount = expenseItem.quantity * expenseItem.unitPrice;
-        
-        if (expenseItem.taxRate) {
-            totalAmount += totalAmount * 0.20;
-        }
+try {    
 
-        const expense = await ExpenseModel.create({
-          ...expenseItem,
-          vendor: data?.vendor?._id,
-          amount: totalAmount
-        });
+  const expenses = await Promise.all(
+    data.expenses.map(async (expenseItem) => {
+      let totalAmount = expenseItem.quantity * expenseItem.unitPrice;
+      
+      if (expenseItem.taxRate) {
+          totalAmount += totalAmount * 0.20;
+      }
 
-        return expense;
-      })
-    );
+      const expense = await ExpenseModel.create({
+        ...expenseItem,
+        vendor: data?.vendor?._id,
+        amount: totalAmount
+      });
 
-    return {
-      expenses
-    };
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-    throw new Error('Error creating expenses');
+      return expense;
+    })
+  );
+
+  return {
+    expenses
+  };
+} catch (error) {
+  if (error instanceof Error) {
+    throw new Error(error.message);
   }
+  throw new Error('Error creating expenses');
+}
 };
 
 

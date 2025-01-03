@@ -1,40 +1,58 @@
 
-import { type IUser } from "./invoices.dto";
-import UserSchema from "./invoices.schema";
+import { Invoice, InvoiceQueryParams, InvoiceStatus } from "./invoices.dto";
+import { InvoiceModel } from "./invoices.schema";
 
-export const createUser = async (data: IUser) => {
-    const result = await UserSchema.create({ ...data, active: true });
-    return result;
-};
+   export const createInvoice = async (data: Invoice, userId:string) => {
+    try {
+      const invoiceData: Partial<Invoice> = {
+        ...data,
+        user: userId,
+        status: InvoiceStatus.DRAFT
+      };
+  
+      const invoice = await InvoiceModel.create(invoiceData);
+      await invoice.populate('customer');
+      
+      return {
+        data:invoice,
+      }
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(error.message);
+          }
+          throw new Error('Error fetching expenses');
+        }
+    }
+   
 
-export const updateUser = async (id: string, data: IUser) => {
-    const result = await UserSchema.findOneAndUpdate({ _id: id }, data, {
-        new: true,
-    });
-    return result;
-};
-
-export const editUser = async (id: string, data: Partial<IUser>) => {
-    const result = await UserSchema.findOneAndUpdate({ _id: id }, data);
-    return result;
-};
-
-export const deleteUser = async (id: string) => {
-    const result = await UserSchema.deleteOne({ _id: id });
-    return result;
-};
-
-export const getUserById = async (id: string) => {
-    const result = await UserSchema.findById(id).lean();
-    return result;
-};
-
-export const getAllUser = async () => {
-    const result = await UserSchema.find({}).lean();
-    return result;
-};
-export const getUserByEmail = async (email: string) => {
-    const result = await UserSchema.findOne({ email }).lean();
-    return result;
-}
-
+    export const getAllInvoices = async (queryParams: InvoiceQueryParams, userId: string) => {
+        try {
+            const { status, customer, startDate, endDate } = queryParams;
+            const query: Record<string, any> = { user: userId };
+            
+            if (status) query.status = status;
+            if (customer) query.customer = customer;
+            if (startDate && endDate) {
+                query.invoiceDate = {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate)
+                };
+            }
+        
+            const invoices = await InvoiceModel
+                .find(query)
+                .populate('customer')
+                .sort({ createdAt: -1 })
+                .lean();
+            
+            return {
+                data: invoices
+            };
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            throw new Error('Error fetching invoices');
+        }
+    };
+  

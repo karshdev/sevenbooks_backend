@@ -1,18 +1,15 @@
 
 import { Router } from "express";
 import { catchError } from "../common/middleware/cath-error.middleware";
-import * as userController from "./invoices.controller";
-import * as userValidator from "./invoices.validation";
+import * as invoiceController from "./invoices.controller";
+import { roleAuth } from "../common/middleware/role-auth.middleware";
 
 const router = Router();
 
 router
-        .get("/", userController.getAllUser)
-        .get("/:id", userController.getUserById)
-        .delete("/:id", userController.deleteUser)
-        .post("/", userValidator.createUser, catchError, userController.createUser)
-        .put("/:id", userValidator.updateUser, catchError, userController.updateUser)
-        .patch("/:id", userValidator.editUser, catchError, userController.editUser)
+        .get("/", roleAuth("USER") , invoiceController.getAllInvoices)
+        .post("/", roleAuth("USER") , invoiceController.createInvoice)
+      
 
 export default router;
 

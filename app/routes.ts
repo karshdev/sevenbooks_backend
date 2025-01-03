@@ -5,6 +5,8 @@ import transactionRoutes from "./transactions/transaction.route";
 import expenseRoutes from "./expenses/expenses.route"
 import customerRoutes  from "./customer/customer.route"
 import vendorRoutes  from "./vendor/vendor.route"
+import invoiceRoutes  from "./invoices/invoices.route"
+
 
 
 
@@ -19,5 +21,7 @@ router.use("/transactions", transactionRoutes);
 router.use("/expense", expenseRoutes);
 router.use("/customer", customerRoutes);
 router.use("/vendor", vendorRoutes);
+router.use("/invoices", invoiceRoutes);
+
 
 export default router;
