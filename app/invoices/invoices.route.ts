@@ -9,6 +9,8 @@ const router = Router();
 router
         .get("/", roleAuth("USER") , invoiceController.getAllInvoices)
         .post("/", roleAuth("USER") , invoiceController.createInvoice)
+        .post("/pay", roleAuth("USER") , invoiceController.payInvoices)
+
       
 
 export default router;

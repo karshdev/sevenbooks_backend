@@ -9,7 +9,7 @@ import { InvoiceQueryParams, InvoiceStatus } from "./invoices.dto";
 
 export const createInvoice = asyncHandler(async (req: Request, res: Response) => {
     const result = await invoiceService.createInvoice(req.body,req?.user!._id);
-    res.send(createResponse(result, "Invoice created sucssefully"))
+    res.send(createResponse(result, "Invoice created successfully"))
 });
 
 
@@ -17,5 +17,11 @@ export const createInvoice = asyncHandler(async (req: Request, res: Response) =>
 export const getAllInvoices = asyncHandler(async (req: Request, res: Response) => {
     const queryParams = req.query as InvoiceQueryParams;
     const result = await invoiceService.getAllInvoices(queryParams, req.user!._id);
-    res.send(createResponse(result,"Invoices fetched sucssefully"));
+    res.send(createResponse(result,"Invoice fetched successfully"));
+});
+
+
+export const payInvoices = asyncHandler(async (req: Request, res: Response) => {
+    const result = await invoiceService.payInvoices(req.body, req.user!._id);
+    res.send(createResponse(result,"Invoice Payed successfully"));
 });

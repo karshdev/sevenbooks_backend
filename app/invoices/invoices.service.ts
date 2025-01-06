@@ -1,4 +1,5 @@
 
+import { AccountModel } from "../banking/banking.schema";
 import { Invoice, InvoiceQueryParams, InvoiceStatus } from "./invoices.dto";
 import { InvoiceModel } from "./invoices.schema";
 
@@ -56,3 +57,55 @@ import { InvoiceModel } from "./invoices.schema";
         }
     };
   
+
+    export const payInvoices = async (data: { invoiceId: Invoice[], accountId: string }, userId: string) => {
+        try {
+            const { invoiceId, accountId } = data;
+            let totalAmount = 0;
+            const updatedInvoices = [];
+    
+            const account = await AccountModel.findById(accountId);
+            if (!account) {
+                throw new Error('Account not found');
+            }
+    
+            for (const invoiceData of invoiceId) {
+                const invoice = await InvoiceModel.findOne({ invoiceNumber: invoiceData.invoiceNumber });
+                if (!invoice) {
+                    console.warn(`Invoice ${invoiceData.invoiceNumber} not found, skipping`);
+                    continue;
+                }
+    
+                if (invoice.status === InvoiceStatus.PAID) {
+                    console.warn(`Invoice ${invoiceData.invoiceNumber} is already paid, skipping`);
+                    continue;
+                }
+    
+                invoice.status = InvoiceStatus.PAID;
+                invoice.dueDate = new Date();
+                await invoice.save();
+    
+                totalAmount += invoice.total;
+                updatedInvoices.push(invoice);
+            }
+    
+            if (updatedInvoices.length === 0) {
+                throw new Error('No valid invoices to process');
+            }
+    
+            account.currentBalance += totalAmount;
+            await account.save();
+    
+            return {
+                message: `Successfully paid ${updatedInvoices.length} invoices`,
+                invoices: updatedInvoices,
+                account
+            };
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            throw new Error('Error processing payment');
+        }
+    };
+    

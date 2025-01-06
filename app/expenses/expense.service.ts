@@ -110,8 +110,7 @@ export const payExpenses = async (data:PayExpenseRequest,userId: string) => {
   try {
     const { expenses, accountId } = data;
 
-    // Get account and verify sufficient balance
-    const account = await AccountModel.findOne({ accountNumber: accountId });
+    const account = await AccountModel.findOne({ _id: accountId });
     if (!account) {
       throw new Error('Account not found');
     }
