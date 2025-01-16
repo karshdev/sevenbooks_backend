@@ -8,7 +8,6 @@ import { ITransaction } from "./transaction.dto";
 const TransactionSchema = new Schema<ITransaction>({
   accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true },
   date: { type: Date, required: true, default: Date.now },
-  payee: { type: String, required: true, trim: true },
   bankMemo: { type: String, trim: true },
   account: {
     type: String,

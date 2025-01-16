@@ -1,5 +1,6 @@
 
 import { AccountModel } from "../banking/banking.schema";
+import { CustomerModel } from "../customer/customer.schema";
 import { Invoice, InvoiceQueryParams, InvoiceStatus } from "./invoices.dto";
 import { InvoiceModel } from "./invoices.schema";
 
@@ -58,15 +59,24 @@ import { InvoiceModel } from "./invoices.schema";
     };
   
 
-    export const payInvoices = async (data: { invoiceId: Invoice[], accountId: string }, userId: string) => {
+    export const payInvoices = async (data: { invoiceId: Invoice[], accountId: string, customerId: string }, userId: string) => {
         try {
-            const { invoiceId, accountId } = data;
+            const { invoiceId, accountId, customerId } = data;
             let totalAmount = 0;
             const updatedInvoices = [];
     
-            const account = await AccountModel.findById(accountId);
+            // Find both account and customer
+            const [account, customer] = await Promise.all([
+                AccountModel.findById(accountId),
+                CustomerModel.findById(customerId)
+            ]);
+    
             if (!account) {
                 throw new Error('Account not found');
+            }
+    
+            if (!customer) {
+                throw new Error('Customer not found');
             }
     
             for (const invoiceData of invoiceId) {
@@ -93,13 +103,21 @@ import { InvoiceModel } from "./invoices.schema";
                 throw new Error('No valid invoices to process');
             }
     
+            // Update both account and customer balances
             account.currentBalance += totalAmount;
-            await account.save();
+            customer.balance = (customer.balance || 0) + totalAmount;
+    
+            // Save both updates
+            await Promise.all([
+                account.save(),
+                customer.save()
+            ]);
     
             return {
                 message: `Successfully paid ${updatedInvoices.length} invoices`,
                 invoices: updatedInvoices,
-                account
+                account,
+                customer
             };
         } catch (error) {
             if (error instanceof Error) {
@@ -108,4 +126,3 @@ import { InvoiceModel } from "./invoices.schema";
             throw new Error('Error processing payment');
         }
     };
-    

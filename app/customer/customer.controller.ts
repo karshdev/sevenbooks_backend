@@ -13,6 +13,11 @@ export const getCustomers = asyncHandler(async (req: Request, res: Response) => 
     res.send(createResponse(result, "Customers fetched successfully"));
 });
 
+export const getTopCustomers = asyncHandler(async (req: Request, res: Response) => {
+    const result = await customerService.getTopCustomer(req.user!._id);
+    res.send(createResponse(result, "Customers fetched successfully"));
+});
+
 export const getCustomerById = asyncHandler(async (req: Request, res: Response) => {
     const result = await customerService.getCustomerById(req.params.id, req.user!._id);
     res.send(createResponse(result, "Customer fetched successfully"));

@@ -71,3 +71,45 @@ export const getChartOfAccounts = async (userId: string, query: {
     throw new Error('Error fetching chart of accounts');
   }
 };
+
+export const updateChartOfAccounts = async (data: ChartOfAccounts, id:string ,userId: string) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new Error('Invalid user ID');
+    }
+
+    if (!id) {
+      throw new Error(' ID is required');
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error('Invalid chart account ID');
+    }
+
+    const existingAccount = await ChartModel.findOne({
+      _id: id,
+      user: userId
+    });
+
+    if (!existingAccount) {
+      throw new Error('Chart account not found or unauthorized');
+    }
+
+    // Update the document
+    const updatedAccount = await ChartModel.findOneAndUpdate({_id:id} , data)
+      .select('-user -updatedAt -__v')
+      .lean();
+
+    if (!updatedAccount) {
+      throw new Error('Failed to update chart account');
+    }
+
+    return updatedAccount;
+
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error('Error updating chart of accounts');
+  }
+};

@@ -13,4 +13,8 @@ export const getChartOfAccounts = asyncHandler(async (req: Request, res: Respons
     const result = await chartService.getChartOfAccounts(req.user!._id,req.query);
     res.send(createResponse(result, "Customer created successfully"));
 });
+export const updateChartOfAccounts = asyncHandler(async (req: Request, res: Response) => {
+    const result = await chartService.updateChartOfAccounts(req.body ,req.params.id,req.user!._id);
+    res.send(createResponse(result, "Customer created successfully"));
+});
 

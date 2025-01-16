@@ -50,6 +50,10 @@ const customerSchema = new Schema<Customer>({
   country: {
     type: String,
     required: true
+  },
+  balance: {
+    type: Number,
+
   }
 }, {
   timestamps: true

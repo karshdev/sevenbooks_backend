@@ -23,6 +23,7 @@ const expenseSchema = new Schema<Expense>({
   taxRate: {
     type: Number,
   },
+  chartOfAccounts: { type: Schema.Types.ObjectId, ref: 'ChartOfAccounts' },
 });
 
 export const VendorModel = mongoose.model<Vendor>('Vendor', vendorSchema);

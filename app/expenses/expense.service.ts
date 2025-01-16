@@ -1,4 +1,5 @@
 import { AccountModel } from "../banking/banking.schema";
+import { Transaction } from "../transactions/transaction.schema";
 import { CreateExpensePayload } from "./expenses.dto";
 import {VendorModel, ExpenseModel } from "./expenses.schema";
 interface PayExpenseRequest {
@@ -10,24 +11,31 @@ interface PayExpenseRequest {
 }
 export const createExpense = async (data: CreateExpensePayload) => { 
 try {    
-
+  console.log("Data",data);
+  
   const expenses = await Promise.all(
     data.expenses.map(async (expenseItem) => {
       let totalAmount = expenseItem.quantity * expenseItem.unitPrice;
       
       if (expenseItem.taxRate) {
-          totalAmount += totalAmount * 0.20;
+        totalAmount += totalAmount * 0.20;
       }
-
-      const expense = await ExpenseModel.create({
+  
+      const expenseData :any = {
         ...expenseItem,
         vendor: data?.vendor?._id,
-        amount: totalAmount
-      });
-
+        amount: totalAmount,
+      };
+  
+      if (data.chartOfAccounts) {
+        expenseData.chartOfAccounts = data.chartOfAccounts;
+      }
+  
+      const expense = await ExpenseModel.create(expenseData);
       return expense;
     })
   );
+  
 
   return {
     expenses
@@ -104,9 +112,7 @@ export const getExpenses = async (userId: string) => {
   }
 };
 
-export const payExpenses = async (data:PayExpenseRequest,userId: string) => {
-
-
+export const payExpenses = async (data: PayExpenseRequest, userId: string) => {
   try {
     const { expenses, accountId } = data;
 
@@ -122,47 +128,72 @@ export const payExpenses = async (data:PayExpenseRequest,userId: string) => {
 
     // Update account balance
     const updatedAccount = await AccountModel.findOneAndUpdate(
-      { accountNumber: accountId },
+      { _id: accountId },
       { $inc: { currentBalance: -totalPayment } },
       { new: true }
     );
 
-    // Process each expense
-    const expenseUpdates = await Promise.all(
-      expenses.map(async ({ expenseId, amountToPay }) => {
-        const expense = await ExpenseModel.findById(expenseId);
-        if (!expense) {
-          throw new Error(`Expense ${expenseId} not found`);
-        }
+    // Process each expense and create corresponding transactions
+    const [expenseUpdates, transactions] = await Promise.all([
+      // Update expenses
+      Promise.all(
+        expenses.map(async ({ expenseId, amountToPay }) => {
+          const expense = await ExpenseModel.findById(expenseId);
+          if (!expense) {
+            throw new Error(`Expense ${expenseId} not found`);
+          }
 
-        // If full amount paid, mark as paid
-        const status = amountToPay >= expense.amount ? 'paid' : 'pending';
-        
-        return ExpenseModel.findByIdAndUpdate(
-          expenseId,
-          {
-            $set: { status },
-            // Reduce the amount by what was paid
-            $inc: { amount: -amountToPay }
-          },
-          { new: true }
-        );
-      })
-    );
+          // If full amount paid, mark as paid
+          const status = amountToPay >= expense.amount ? 'paid' : 'pending';
+          
+          return ExpenseModel.findByIdAndUpdate(
+            expenseId,
+            {
+              $set: { status },
+              $inc: { amount: -amountToPay }
+            },
+            { new: true }
+          );
+        })
+      ),
+      
+      // Create transactions
+      Promise.all(
+        expenses.map(async ({ expenseId, amountToPay }) => {
+          const expense = await ExpenseModel.findById(expenseId);
+          if (!expense) {
+            throw new Error(`Expense ${expenseId} not found`);
+          }
 
-   
+          const transaction = new Transaction({
+            accountId: accountId,
+            date: new Date(),
+            payee: expenseId,  // Reference to the expense
+            bankMemo: `Payment for expense: ${expense.description || 'No description'}`,
+            account: account.accountType.toLowerCase(), // Convert account type to match enum
+            payment: amountToPay,
+            deposit: 0,
+            action: "Approved"  // Since this is an immediate payment
+          });
+
+          return transaction.save();
+        })
+      )
+    ]);
+
     return {
       expenses,
       account: updatedAccount,
-      updatedExpenses: expenseUpdates
-    }
+      updatedExpenses: expenseUpdates,
+      transactions: transactions
+    };
 
   } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Error fetching expenses');
+    if (error instanceof Error) {
+      throw new Error(error.message);
     }
+    throw new Error('Error processing expense payments');
   }
+};
 
 

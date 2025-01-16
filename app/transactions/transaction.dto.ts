@@ -4,7 +4,7 @@ import { BaseSchema } from "../common/dto/base.dto";
 export interface ITransaction extends BaseSchema {
         accountId: Types.ObjectId; 
         date: Date;
-        payee: string; 
+        payee:  Types.ObjectId; 
         bankMemo?: string; 
         account: "checking" | "cash" | "credit_card" | "loan"; 
         payment?: number;

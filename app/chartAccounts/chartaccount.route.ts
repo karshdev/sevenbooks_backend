@@ -10,5 +10,7 @@ const router = Router();
 router
         .post("/" , roleAuth("USER") , chartValidator.createChartOfAccounts , catchError  , chartController.createChartOfAccounts)
         .get("/" , roleAuth("USER") , chartController.getChartOfAccounts)
+        .put("/:id" , roleAuth("USER") , chartController.updateChartOfAccounts)
+
 
 export default router;

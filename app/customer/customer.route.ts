@@ -11,5 +11,7 @@ router
         .get("/:id",roleAuth("USER") , expenseController.getCustomerById)
         .post("/" , roleAuth("USER") , expenseValidator.createCustomer , catchError  , expenseController.createCustomer)
         .get("/" , roleAuth("USER") , catchError , expenseController.getCustomers)
+        .get("/top/customer" , roleAuth("USER") , catchError , expenseController.getTopCustomers)
+
 
 export default router;

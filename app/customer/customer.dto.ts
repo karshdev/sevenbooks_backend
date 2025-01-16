@@ -13,5 +13,7 @@ import { type BaseSchema } from "../common/dto/base.dto";
         postalCode:string;
         provinceState:string;
         country:string;
+        balance:number;
+
         user: Types.ObjectId;
       }

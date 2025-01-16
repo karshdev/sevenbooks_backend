@@ -20,7 +20,7 @@ import { type BaseSchema } from "../common/dto/base.dto";
         quantity:number;
         unitPrice:number
         taxRate: number
-      
+        chartOfAccounts:Types.ObjectId
       }
 
      export interface CreateExpensePayload {
@@ -41,6 +41,7 @@ import { type BaseSchema } from "../common/dto/base.dto";
           unitPrice: number;
           taxRate: number;
         }];
+        chartOfAccounts?:string
       }
 
  export interface TransferFunds {
