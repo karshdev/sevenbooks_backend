@@ -28,7 +28,7 @@ const app: Express = express();
 
 
 const corsOptions = {
-  origin: ["https://sevenbooks-nine.vercel.app"], 
+  origin: ["http://sevenbooks-nine.vercel.app"], 
   methods: ["GET", "POST", "PUT", "DELETE"], 
   allowedHeaders: ["Content-Type", "Authorization"], 
   credentials: true, 

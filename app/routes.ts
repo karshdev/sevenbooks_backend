@@ -8,11 +8,11 @@ import vendorRoutes  from "./vendor/vendor.route"
 import invoiceRoutes  from "./invoices/invoices.route"
 import chartAccounts  from "./chartAccounts/chartaccount.route"
 import generalLedgerRoutes  from "./generalLedger/generalLedger.route"
+import inventoryRoutes  from "./inventory/inventory.route"
 
 
 // routes
 const router = express.Router();
-
 router.use("/users", userRoutes);
 router.use("/account", bankRoutes);
 router.use("/transactions", transactionRoutes);
@@ -22,5 +22,7 @@ router.use("/vendor", vendorRoutes);
 router.use("/invoices", invoiceRoutes);
 router.use("/chart-accounts", chartAccounts);
 router.use("/general-ledger", generalLedgerRoutes);
+router.use("/inventory", inventoryRoutes);
+
 
 export default router;
