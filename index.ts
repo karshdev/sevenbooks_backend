@@ -46,7 +46,7 @@ const initApp = async (): Promise<void> => {
 
   // passport init
   initPassport();
- console.log("Below passport");
+ console.log("Below passport")
  
   // set base path to /api
   app.use("/api", routes);
